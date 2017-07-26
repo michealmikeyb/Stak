@@ -76,7 +76,9 @@ public class MainActivity  extends AppCompatActivity implements  DownloadCallbac
         }
 
 
-        mNetworkFragment = NetworkFragment.getInstance(getSupportFragmentManager(), "https://www.google.com");
+        mNetworkFragment = NetworkFragment.getInstance(getSupportFragmentManager(), "https://www.android.com");
+        mNetworkFragment.onCreate(null);
+        mNetworkFragment.onAttach(this);
         startDownload();
 
 

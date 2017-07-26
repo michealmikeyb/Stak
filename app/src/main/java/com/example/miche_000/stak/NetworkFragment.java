@@ -101,8 +101,6 @@ public class NetworkFragment extends Fragment {
 
         DownloadTask(DownloadCallback<String> callback) {
             setCallback(callback);
-
-            System.out.println("test");
         }
 
         void setCallback(DownloadCallback<String> callback) {
@@ -118,6 +116,7 @@ public class NetworkFragment extends Fragment {
             public String mResultValue;
             public Exception mException;
 
+
             public Result(String resultValue) {
                 mResultValue = resultValue;
             }
@@ -132,6 +131,8 @@ public class NetworkFragment extends Fragment {
          */
         @Override
         protected void onPreExecute() {
+
+
             if (mCallback != null) {
                 NetworkInfo networkInfo = mCallback.getActiveNetworkInfo();
                 if (networkInfo == null || !networkInfo.isConnected() ||
