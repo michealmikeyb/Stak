@@ -58,6 +58,10 @@ public class NetworkFragment extends Fragment {
         mCallback = (DownloadCallback) context;
     }
 
+    public void setmCallback(DownloadCallback d){
+        mCallback = d;
+    }
+
     @Override
     public void onDetach() {
         super.onDetach();

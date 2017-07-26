@@ -78,7 +78,7 @@ public class MainActivity  extends AppCompatActivity implements  DownloadCallbac
 
         mNetworkFragment = NetworkFragment.getInstance(getSupportFragmentManager(), "https://www.android.com");
         mNetworkFragment.onCreate(null);
-        mNetworkFragment.onAttach(this);
+        mNetworkFragment.setmCallback(this);
         startDownload();
 
 
@@ -96,7 +96,7 @@ public class MainActivity  extends AppCompatActivity implements  DownloadCallbac
 
 
     public void updateFromDownload(String result) {
-        text.setText("test");
+        text.setText(result);
     }
 
     /**
@@ -107,7 +107,7 @@ public class MainActivity  extends AppCompatActivity implements  DownloadCallbac
      */
     @Override
     public void updateFromDownload(Object result) {
-        text.setText("test" );
+        text.setText((String)result );
     }
 
     @Override
@@ -143,6 +143,7 @@ public class MainActivity  extends AppCompatActivity implements  DownloadCallbac
         if (mNetworkFragment != null) {
             mNetworkFragment.cancelDownload();
         }
+        System.out.println("finished");
     }
 
 
