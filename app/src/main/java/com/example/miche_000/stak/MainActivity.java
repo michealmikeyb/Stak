@@ -111,9 +111,14 @@ public class MainActivity  extends AppCompatActivity implements  DownloadCallbac
     @Override
     public void updateFromDownload(Object result) {
         String json = (String) result;
+        int dataStart = json.lastIndexOf("data")+7;
+        int dataEnd = json.lastIndexOf("after")-5;
+        String title = json.substring(dataStart, dataEnd);
+        System.out.println(title.substring(360));
+
         Gson gson = new Gson();
-        content c = gson.fromJson(json, content.class);
-        text.setText(c.toString());
+        listing d = gson.fromJson(title, listing.class);
+        text.setText(d.getUrl());
 
     }
 
