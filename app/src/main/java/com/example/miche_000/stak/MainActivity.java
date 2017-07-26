@@ -1,5 +1,8 @@
 package com.example.miche_000.stak;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.provider.Settings;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -8,16 +11,33 @@ import android.widget.TextView;
 import android.view.MotionEvent;
 import android.view.GestureDetector;
 
-public class MainActivity extends AppCompatActivity implements  GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener{
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.io.BufferedInputStream;
+import java.io.InputStream;
+
+public class MainActivity  extends AppCompatActivity implements  DownloadCallback, GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener{
     private TextView text;
     private GestureDetectorCompat gestureDetector;
+
+    // Keep a reference to the NetworkFragment, which owns the AsyncTask object
+    // that is used to execute network ops.
+    private NetworkFragment mNetworkFragment;
+
+    // Boolean telling us whether a download is in progress, so we don't trigger overlapping
+    // downloads with consecutive button clicks.
+    private boolean mDownloading = false;
 
     private static final int SWIPE_MIN_DISTANCE = 120;
     private static final int SWIPE_MAX_OFF_PATH = 250;
     private static final int SWIPE_THRESHOLD_VELOCITY = 200;
 
+
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate (Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -54,10 +74,76 @@ public class MainActivity extends AppCompatActivity implements  GestureDetector.
             else if(p.name.equals("movies"))
                     movieCount++;
         }
-        text.setText("movies: "+movieCount+"pics: "+ picCount);
+
+
+        mNetworkFragment = NetworkFragment.getInstance(getSupportFragmentManager(), "https://www.google.com");
+        startDownload();
+
+
 
 
     }
+
+    private void startDownload() {
+        if (!mDownloading && mNetworkFragment != null) {
+            // Execute the async download.
+            mNetworkFragment.startDownload();
+            mDownloading = true;
+        }
+    }
+
+
+    public void updateFromDownload(String result) {
+        text.setText("test");
+    }
+
+    /**
+     * Indicates that the callback handler needs to update its appearance or information based on
+     * the result of the task. Expected to be called from the main thread.
+     *
+     * @param result
+     */
+    @Override
+    public void updateFromDownload(Object result) {
+        text.setText("test" );
+    }
+
+    @Override
+    public NetworkInfo getActiveNetworkInfo() {
+        ConnectivityManager connectivityManager =
+                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+        return networkInfo;
+    }
+
+    @Override
+    public void onProgressUpdate(int progressCode, int percentComplete) {
+        switch(progressCode) {
+            // You can add UI behavior for progress updates here.
+            case Progress.ERROR:
+                text.setText("error");
+                break;
+            case Progress.CONNECT_SUCCESS:
+                text.setText("connected");
+                break;
+            case Progress.GET_INPUT_STREAM_SUCCESS:
+                break;
+            case Progress.PROCESS_INPUT_STREAM_IN_PROGRESS:
+                break;
+            case Progress.PROCESS_INPUT_STREAM_SUCCESS:
+                break;
+        }
+    }
+
+    @Override
+    public void finishDownloading() {
+        mDownloading = false;
+        if (mNetworkFragment != null) {
+            mNetworkFragment.cancelDownload();
+        }
+    }
+
+
 
     public void onLeftSwipe(){
         text.setText(("left"));
@@ -67,10 +153,12 @@ public class MainActivity extends AppCompatActivity implements  GestureDetector.
         text.setText("right");
     }
 
+
+
     /**
      * Notified when a single-tap occurs.
      * <p>
-     * Unlike {@link OnGestureListener#onSingleTapUp(MotionEvent)}, this
+     * Unlike ] this
      * will only be called after the detector is confident that the user's
      * first tap is not followed by a second tap leading to a double-tap
      * gesture.
