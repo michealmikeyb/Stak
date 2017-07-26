@@ -8,11 +8,13 @@ import android.provider.Settings;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.view.MotionEvent;
 import android.view.GestureDetector;
 
 import com.google.gson.Gson;
+import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -24,6 +26,7 @@ import java.io.InputStream;
 public class MainActivity  extends AppCompatActivity implements  DownloadCallback, GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener{
     private TextView text;
     private GestureDetectorCompat gestureDetector;
+    private ImageView iv;
 
     // Keep a reference to the NetworkFragment, which owns the AsyncTask object
     // that is used to execute network ops.
@@ -37,6 +40,12 @@ public class MainActivity  extends AppCompatActivity implements  DownloadCallbac
     private static final int SWIPE_MAX_OFF_PATH = 250;
     private static final int SWIPE_THRESHOLD_VELOCITY = 200;
 
+    private String currentSubreddit;
+    private TagList list;
+    private String currentAfter;
+    private SubList sublist;
+    private boolean isPopular = true;
+
 
 
     @Override
@@ -45,38 +54,16 @@ public class MainActivity  extends AppCompatActivity implements  DownloadCallbac
         setContentView(R.layout.activity_main);
 
         text = (TextView) findViewById(R.id.text1);
+        iv = (ImageView) findViewById(R.id.imageView) ;
+        Picasso.with(this).load("http://i.imgur.com/kJYBDHJ.gifv").into(iv);
         gestureDetector = new GestureDetectorCompat(this, this);
         gestureDetector.setOnDoubleTapListener(this);
 
-        PersonalTag pictures = new PersonalTag("pics");
-        PersonalTag movies = new PersonalTag("movies");
-        PersonalTag music = new PersonalTag("music");
 
-        TagList list = new TagList();
 
-        list.like(pictures);
-        list.like(pictures);
-        list.like(movies);
-        list.dislike(music);
-        list.dislike(movies);
-        list.like(pictures);
+        list = new TagList();
+        sublist = new SubList();
 
-        for(int i = 0; i<100; i++)
-        list.like(pictures);
-
-        for(int i = 0; i<4;i++)
-            list.dislike(movies);
-        list.like(pictures);
-
-        int movieCount = 0;
-        int picCount = 0;
-
-        for(PersonalTag p: list.getArrayList()){
-            if(p.name.equals("pics"))
-                picCount++;
-            else if(p.name.equals("movies"))
-                    movieCount++;
-        }
 
 
         mNetworkFragment = NetworkFragment.getInstance(getSupportFragmentManager(), "https://www.reddit.com/r/popular.json?limit=1");
@@ -114,11 +101,18 @@ public class MainActivity  extends AppCompatActivity implements  DownloadCallbac
         int dataStart = json.lastIndexOf("data")+7;
         int dataEnd = json.lastIndexOf("after")-5;
         String title = json.substring(dataStart, dataEnd);
-        System.out.println(title.substring(360));
+
+        int afterStart = json.lastIndexOf("after")+9;
+        int afterEnd = json.lastIndexOf("before")-4;
+        currentAfter = json.substring(afterStart, afterEnd);
+
+
 
         Gson gson = new Gson();
         listing d = gson.fromJson(title, listing.class);
-        text.setText(d.getUrl());
+        text.setText(d.getSubreddit());
+        currentSubreddit = d.getSubreddit();
+        Picasso.with(this).load("http://i.imgur.com/kJYBDHJ.gifv").into(iv);
 
     }
 
@@ -161,11 +155,48 @@ public class MainActivity  extends AppCompatActivity implements  DownloadCallbac
 
 
     public void onLeftSwipe(){
-        text.setText(("left"));
+        list.dislike(new PersonalTag(currentSubreddit));
+        sublist.setAfter(currentSubreddit, currentAfter);
+        if(isPopular){
+            sublist.setAfter("popular", currentAfter);
+        }
+
+        String newSub = list.getTag();
+        isPopular = newSub.equals("popular");
+
+        if(sublist.getAfter(newSub).equals("notIn")) {
+            mNetworkFragment = NetworkFragment.getInstance(getSupportFragmentManager(), "https://www.reddit.com/r/" + newSub + ".json?limit=1");
+            System.out.println("https://www.reddit.com/r/" + newSub + ".json?limit=1");
+        }
+        else {
+            mNetworkFragment = NetworkFragment.getInstance(getSupportFragmentManager(), "https://www.reddit.com/r/" + newSub + ".json?limit=1;after=" + sublist.getAfter(newSub));
+            System.out.println("https://www.reddit.com/r/" + newSub + ".json?limit=1;after=" + sublist.getAfter(newSub));
+        }
+        mNetworkFragment.onCreate(null);
+        mNetworkFragment.setmCallback(this);
+        startDownload();
+
+        System.out.println("https://www.reddit.com/r/"+newSub+".json?limit=1");
+
     }
 
     public void onRightSwipe(){
-        text.setText("right");
+        list.like(new PersonalTag(currentSubreddit));
+        sublist.setAfter(currentSubreddit, currentAfter);
+        if(isPopular){
+            sublist.setAfter("popular", currentAfter);
+        }
+
+        String newSub = list.getTag();
+        isPopular = newSub.equals("popular");
+
+        if(sublist.getAfter(newSub).equals("notIn"))
+            mNetworkFragment = NetworkFragment.getInstance(getSupportFragmentManager(), "https://www.reddit.com/r/"+newSub+".json?limit=1");
+        else
+            mNetworkFragment = NetworkFragment.getInstance(getSupportFragmentManager(), "https://www.reddit.com/r/"+newSub+".json?limit=1;after="+sublist.getAfter(newSub));
+        mNetworkFragment.onCreate(null);
+        mNetworkFragment.setmCallback(this);
+        startDownload();
     }
 
 
