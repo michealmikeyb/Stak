@@ -3,6 +3,7 @@ package com.example.miche_000.stak;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -10,6 +11,8 @@ import android.os.Bundle;
 import android.widget.TextView;
 import android.view.MotionEvent;
 import android.view.GestureDetector;
+
+import com.google.gson.Gson;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -76,7 +79,7 @@ public class MainActivity  extends AppCompatActivity implements  DownloadCallbac
         }
 
 
-        mNetworkFragment = NetworkFragment.getInstance(getSupportFragmentManager(), "https://www.android.com");
+        mNetworkFragment = NetworkFragment.getInstance(getSupportFragmentManager(), "https://www.reddit.com/r/popular.json?limit=1");
         mNetworkFragment.onCreate(null);
         mNetworkFragment.setmCallback(this);
         startDownload();
@@ -107,7 +110,11 @@ public class MainActivity  extends AppCompatActivity implements  DownloadCallbac
      */
     @Override
     public void updateFromDownload(Object result) {
-        text.setText((String)result );
+        String json = (String) result;
+        Gson gson = new Gson();
+        content c = gson.fromJson(json, content.class);
+        text.setText(c.toString());
+
     }
 
     @Override

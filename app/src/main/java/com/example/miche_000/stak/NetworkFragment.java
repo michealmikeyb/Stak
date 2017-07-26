@@ -219,7 +219,7 @@ public class NetworkFragment extends Fragment {
                 stream = connection.getInputStream();
                 if (stream != null) {
                     // Converts Stream to String with max length of 500.
-                    result = readStream(stream, 500);
+                    result = readStream(stream, 50000000);
                 }
             } finally {
                 // Close Stream and disconnect HTTPS connection.
