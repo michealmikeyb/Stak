@@ -29,9 +29,7 @@
         app:srcCompat="@android:drawable/alert_light_frame"
         android:id="@+id/imageView"
         android:layout_centerVertical="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginRight="138dp"
-        android:layout_marginEnd="138dp" />
+        android:layout_centerHorizontal="true" />
+
 
 </RelativeLayout>

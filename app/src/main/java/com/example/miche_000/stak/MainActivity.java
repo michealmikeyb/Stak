@@ -14,6 +14,7 @@ import android.view.MotionEvent;
 import android.view.GestureDetector;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
@@ -98,7 +99,11 @@ public class MainActivity  extends AppCompatActivity implements  DownloadCallbac
     @Override
     public void updateFromDownload(Object result) {
         String json = (String) result;
-        int dataStart = json.lastIndexOf("data")+7;
+        if(getDomain(json).equals("youtube.com")){
+
+        }
+        else {
+        int dataStart = json.lastIndexOf("\"data\":")+7;
         int dataEnd = json.lastIndexOf("after")-5;
         String title = json.substring(dataStart, dataEnd);
 
@@ -108,11 +113,18 @@ public class MainActivity  extends AppCompatActivity implements  DownloadCallbac
 
 
 
-        Gson gson = new Gson();
-        listing d = gson.fromJson(title, listing.class);
-        text.setText(d.getSubreddit());
-        currentSubreddit = d.getSubreddit();
-        Picasso.with(this).load("http://i.imgur.com/kJYBDHJ.gifv").into(iv);
+            Gson gson = new Gson();
+            listing d;
+            try {
+                d = gson.fromJson(title, listing.class);
+            } catch (JsonSyntaxException e) {
+                d = new listing();
+                text.setText(e.toString());
+            }
+            text.setText(d.getTitle());
+            currentSubreddit = d.getSubreddit();
+            Picasso.with(this).load(d.getUrl()).into(iv);
+        }
 
     }
 
@@ -150,6 +162,12 @@ public class MainActivity  extends AppCompatActivity implements  DownloadCallbac
             mNetworkFragment.cancelDownload();
         }
         System.out.println("finished");
+    }
+
+    public String getDomain(String j){
+        int start = j.lastIndexOf("\"domain\":")+11;
+        int end = j.lastIndexOf("\"hidden\":") -3;
+        return j.substring(start, end);
     }
 
 
