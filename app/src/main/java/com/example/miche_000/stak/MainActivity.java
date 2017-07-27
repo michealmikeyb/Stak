@@ -1,6 +1,7 @@
 package com.example.miche_000.stak;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.provider.ContactsContract;
@@ -14,20 +15,28 @@ import android.view.MotionEvent;
 import android.view.GestureDetector;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.squareup.picasso.Picasso;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.io.BufferedInputStream;
 import java.io.InputStream;
 
+import pl.droidsonroids.gif.GifImageView;
+
 public class MainActivity  extends AppCompatActivity implements  DownloadCallback, GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener{
     private TextView text;
     private GestureDetectorCompat gestureDetector;
     private ImageView iv;
+    private GifImageView gifView;
 
     // Keep a reference to the NetworkFragment, which owns the AsyncTask object
     // that is used to execute network ops.
@@ -47,6 +56,12 @@ public class MainActivity  extends AppCompatActivity implements  DownloadCallbac
     private SubList sublist;
     private boolean isPopular = true;
 
+    private SharedPreferences.Editor tagPref;
+    private SharedPreferences.Editor placePref;
+    private SharedPreferences tagSettings;
+    private SharedPreferences placeSettings;
+
+
 
 
     @Override
@@ -56,7 +71,8 @@ public class MainActivity  extends AppCompatActivity implements  DownloadCallbac
 
         text = (TextView) findViewById(R.id.text1);
         iv = (ImageView) findViewById(R.id.imageView) ;
-        Picasso.with(this).load("http://i.imgur.com/kJYBDHJ.gifv").into(iv);
+        gifView = (GifImageView) findViewById(R.id.gif);
+        Picasso.with(this).load("http://i.imgur.com/kJYBDHJ.gif").into(iv);
         gestureDetector = new GestureDetectorCompat(this, this);
         gestureDetector.setOnDoubleTapListener(this);
 
@@ -64,6 +80,12 @@ public class MainActivity  extends AppCompatActivity implements  DownloadCallbac
 
         list = new TagList();
         sublist = new SubList();
+
+        tagSettings = getSharedPreferences("tagSave", Context.MODE_PRIVATE);
+        placeSettings = getSharedPreferences("placeSave", Context.MODE_PRIVATE);
+        tagPref = tagSettings.edit();
+        placePref = placeSettings.edit();
+        restore();
 
 
 
@@ -99,6 +121,7 @@ public class MainActivity  extends AppCompatActivity implements  DownloadCallbac
     @Override
     public void updateFromDownload(Object result) {
         String json = (String) result;
+        save();
         if(getDomain(json).equals("youtube.com")){
 
         }
@@ -168,6 +191,41 @@ public class MainActivity  extends AppCompatActivity implements  DownloadCallbac
         int start = j.lastIndexOf("\"domain\":")+11;
         int end = j.lastIndexOf("\"hidden\":") -3;
         return j.substring(start, end);
+    }
+
+
+    public boolean save(){
+        GsonBuilder gsonb = new GsonBuilder();
+        Gson gson = gsonb.create();
+        try{
+            String tagValue = gson.toJson(list);
+            String placeValue = gson.toJson(sublist);
+
+            tagPref.putString("tagSave", tagValue);
+            tagPref.commit();
+
+            placePref.putString("placeSave", placeValue);
+            placePref.commit();
+            return true;
+
+        }
+        catch (Exception e) {
+            System.out.println("save error");
+            return false;
+        }
+    }
+
+    public void restore(){
+        GsonBuilder gsonb = new GsonBuilder();
+        Gson gson = gsonb.create();
+
+        String tagLoad = tagSettings.getString("tagSave", "");
+        list = gson.fromJson(tagLoad, TagList.class);
+
+        String placeLoad = placeSettings.getString("placeSave", "");
+        sublist = gson.fromJson(placeLoad, SubList.class);
+
+
     }
 
 
