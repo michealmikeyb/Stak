@@ -9,6 +9,7 @@ import android.provider.Settings;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.view.MotionEvent;
@@ -36,7 +37,6 @@ public class MainActivity  extends AppCompatActivity implements  DownloadCallbac
     private TextView text;
     private GestureDetectorCompat gestureDetector;
     private ImageView iv;
-    private GifImageView gifView;
 
     // Keep a reference to the NetworkFragment, which owns the AsyncTask object
     // that is used to execute network ops.
@@ -71,25 +71,36 @@ public class MainActivity  extends AppCompatActivity implements  DownloadCallbac
 
         text = (TextView) findViewById(R.id.text1);
         iv = (ImageView) findViewById(R.id.imageView) ;
-        gifView = (GifImageView) findViewById(R.id.gif);
-        Picasso.with(this).load("http://i.imgur.com/kJYBDHJ.gif").into(iv);
         gestureDetector = new GestureDetectorCompat(this, this);
         gestureDetector.setOnDoubleTapListener(this);
-
 
 
         list = new TagList();
         sublist = new SubList();
 
-        tagSettings = getSharedPreferences("tagSave", Context.MODE_PRIVATE);
-        placeSettings = getSharedPreferences("placeSave", Context.MODE_PRIVATE);
+        tagSettings = getSharedPreferences("stakTagSave", Context.MODE_PRIVATE);
+        placeSettings = getSharedPreferences("stakPlaceSave", Context.MODE_PRIVATE);
         tagPref = tagSettings.edit();
         placePref = placeSettings.edit();
-        restore();
+        if(tagSettings.contains("stakTagSave"))
+            restore();
+        else
+            save();
 
 
 
-        mNetworkFragment = NetworkFragment.getInstance(getSupportFragmentManager(), "https://www.reddit.com/r/popular.json?limit=1");
+        text.setText("Start Swiping");
+        String newSub = list.getTag();
+        isPopular = newSub.equals("popular");
+
+        if(sublist.getAfter(newSub).equals("notIn")) {
+            mNetworkFragment = NetworkFragment.getInstance(getSupportFragmentManager(), "https://www.reddit.com/r/" + newSub + ".json?limit=1");
+            System.out.println("https://www.reddit.com/r/" + newSub + ".json?limit=1");
+        }
+        else {
+            mNetworkFragment = NetworkFragment.getInstance(getSupportFragmentManager(), "https://www.reddit.com/r/" + newSub + ".json?limit=1;after=" + sublist.getAfter(newSub));
+            System.out.println("https://www.reddit.com/r/" + newSub + ".json?limit=1;after=" + sublist.getAfter(newSub));
+        }
         mNetworkFragment.onCreate(null);
         mNetworkFragment.setmCallback(this);
         startDownload();
@@ -201,10 +212,10 @@ public class MainActivity  extends AppCompatActivity implements  DownloadCallbac
             String tagValue = gson.toJson(list);
             String placeValue = gson.toJson(sublist);
 
-            tagPref.putString("tagSave", tagValue);
+            tagPref.putString("stakTagSave", tagValue);
             tagPref.commit();
 
-            placePref.putString("placeSave", placeValue);
+            placePref.putString("stakPlaceSave", placeValue);
             placePref.commit();
             return true;
 
@@ -219,11 +230,13 @@ public class MainActivity  extends AppCompatActivity implements  DownloadCallbac
         GsonBuilder gsonb = new GsonBuilder();
         Gson gson = gsonb.create();
 
-        String tagLoad = tagSettings.getString("tagSave", "");
+        String tagLoad = tagSettings.getString("stakTagSave", "");
         list = gson.fromJson(tagLoad, TagList.class);
 
-        String placeLoad = placeSettings.getString("placeSave", "");
+        String placeLoad = placeSettings.getString("stakPlaceSave", "");
         sublist = gson.fromJson(placeLoad, SubList.class);
+
+        System.out.println(placeLoad);
 
 
     }
@@ -325,6 +338,7 @@ public class MainActivity  extends AppCompatActivity implements  DownloadCallbac
      */
     @Override
     public boolean onDown(MotionEvent e) {
+        sublist = new SubList();
         return true;
     }
 
