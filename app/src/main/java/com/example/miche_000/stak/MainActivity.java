@@ -338,7 +338,7 @@ public class MainActivity  extends AppCompatActivity implements  DownloadCallbac
      */
     @Override
     public boolean onDown(MotionEvent e) {
-        sublist = new SubList();
+        //sublist = new SubList();
         return true;
     }
 
