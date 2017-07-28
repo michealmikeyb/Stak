@@ -41,6 +41,7 @@ public class TagList {
         for(PersonalTag s: allTags){
             if(s.name.equals(p.name)){
                 alreadyIn = true;
+                break;
             }
         }
         double raise;

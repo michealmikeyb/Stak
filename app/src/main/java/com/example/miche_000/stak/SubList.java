@@ -27,6 +27,7 @@ public class SubList {
             if(l.subreddit.equals(s)) {
                 alreadyIn = true;
                 l.setAfter(a);
+                break;
             }
         }
         if(!alreadyIn)

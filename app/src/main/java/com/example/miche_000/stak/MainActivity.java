@@ -270,7 +270,9 @@ public class MainActivity  extends AppCompatActivity implements  DownloadCallbac
     }
 
     public void onRightSwipe(){
+
         list.like(new PersonalTag(currentSubreddit));
+        System.out.println("right swipe");
         sublist.setAfter(currentSubreddit, currentAfter);
         if(isPopular){
             sublist.setAfter("popular", currentAfter);
