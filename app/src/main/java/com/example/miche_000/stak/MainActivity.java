@@ -245,10 +245,11 @@ public class MainActivity  extends AppCompatActivity implements  DownloadCallbac
 
     public void onLeftSwipe(){
         list.dislike(new PersonalTag(currentSubreddit));
-        sublist.setAfter(currentSubreddit, currentAfter);
         if(isPopular){
             sublist.setAfter("popular", currentAfter);
         }
+        else
+            sublist.setAfter(currentSubreddit, currentAfter);
 
         String newSub = list.getTag();
         isPopular = newSub.equals("popular");
@@ -264,19 +265,18 @@ public class MainActivity  extends AppCompatActivity implements  DownloadCallbac
         mNetworkFragment.onCreate(null);
         mNetworkFragment.setmCallback(this);
         startDownload();
-
-        System.out.println("https://www.reddit.com/r/"+newSub+".json?limit=1");
+        System.out.println("left swipe");
 
     }
 
     public void onRightSwipe(){
 
         list.like(new PersonalTag(currentSubreddit));
-        System.out.println("right swipe");
-        sublist.setAfter(currentSubreddit, currentAfter);
         if(isPopular){
             sublist.setAfter("popular", currentAfter);
         }
+        else
+            sublist.setAfter(currentSubreddit, currentAfter);
 
         String newSub = list.getTag();
         isPopular = newSub.equals("popular");
@@ -288,6 +288,7 @@ public class MainActivity  extends AppCompatActivity implements  DownloadCallbac
         mNetworkFragment.onCreate(null);
         mNetworkFragment.setmCallback(this);
         startDownload();
+        System.out.println("right swipe");
     }
 
 

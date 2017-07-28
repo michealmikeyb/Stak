@@ -24,7 +24,7 @@ public class SubList {
     public void setAfter(String s, String a){
         boolean alreadyIn = false;
         for(Sub l: list){
-            if(l.subreddit.equals(s)) {
+            if(l.subreddit !=null && l.subreddit.equals(s)) {
                 alreadyIn = true;
                 l.setAfter(a);
                 break;

@@ -23,7 +23,7 @@ public class TagList {
 
         allTags.add(popular);
 
-        int[] deflist = new int[10000];
+        int[] deflist = new int[8000];
 
         int j = 0;
         for(int i : deflist){
@@ -39,7 +39,7 @@ public class TagList {
     public void like(PersonalTag p){
         boolean alreadyIn = false;
         for(PersonalTag s: allTags){
-            if(s.name.equals(p.name)){
+            if(s.name!=null && s.name.equals(p.name)){
                 alreadyIn = true;
                 break;
             }
@@ -75,8 +75,9 @@ public class TagList {
     public void dislike(PersonalTag p){
         boolean alreadyIn = false;
         for(PersonalTag s: allTags){
-            if(s.name.equals(p.name)){
+            if(s.name!=null && s.name.equals(p.name)){
                 alreadyIn = true;
+                break;
             }
         }
         double deficit;
