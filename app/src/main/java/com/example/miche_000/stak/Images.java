@@ -2,6 +2,8 @@ package com.example.miche_000.stak;
 
 /**
  * Created by miche_000 on 7/25/2017.
+ * gives the information for the image on a specific posting
+ * in reddit
  */
 
 public class Images {

@@ -2,6 +2,9 @@ package com.example.miche_000.stak;
 
 /**
  * Created by miche_000 on 7/25/2017.
+ * stores all the data including link, score,
+ * subreddit and other information for a listing
+ * on reddit.
  */
 
 public class Data {

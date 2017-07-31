@@ -2,6 +2,8 @@ package com.example.miche_000.stak;
 
 /**
  * Created by miche_000 on 7/25/2017.
+ * children class for storing the child listings for a particular
+ * reddit listing
  */
 
 public class Children {

@@ -4,6 +4,7 @@ import java.util.Objects;
 
 /**
  * Created by miche_000 on 7/26/2017.
+ * stores all the information for a specific listing on reddit
  */
 
 public class listing

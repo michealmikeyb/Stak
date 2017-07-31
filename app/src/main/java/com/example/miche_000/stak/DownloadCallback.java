@@ -4,6 +4,8 @@ import android.net.NetworkInfo;
 
 /**
  * Created by miche_000 on 7/25/2017.
+ * interface for calling back after a download
+ * from the internet starts.
  */
 
 public interface DownloadCallback<T> {

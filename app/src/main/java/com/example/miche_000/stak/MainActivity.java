@@ -1,42 +1,34 @@
+/*
+*main activity for an app that pulls listings from the reddit
+* api then displays them on the phone with the relavent picture.
+* the user can then swipe left or right corresponding to disliking
+* or liking the post which is fed into the taglist class which
+* customizes the experience of the user based on their likes
+* and dislikes.
+ */
 package com.example.miche_000.stak;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.provider.ContactsContract;
-import android.provider.Settings;
+import android.os.Bundle;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.widget.Button;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.view.MotionEvent;
-import android.view.GestureDetector;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.squareup.picasso.Picasso;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.io.BufferedInputStream;
-import java.io.InputStream;
-
-import pl.droidsonroids.gif.GifImageView;
-
 public class MainActivity  extends AppCompatActivity implements  DownloadCallback, GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener{
-    private TextView text;
-    private GestureDetectorCompat gestureDetector;
-    private ImageView iv;
+    private TextView text;// text at the top that displays the title of the post
+    private GestureDetectorCompat gestureDetector;//gesture detector for detecting either a right or left swipe
+    private ImageView iv; // image view for displaying the images of posts
 
     // Keep a reference to the NetworkFragment, which owns the AsyncTask object
     // that is used to execute network ops.
@@ -46,16 +38,18 @@ public class MainActivity  extends AppCompatActivity implements  DownloadCallbac
     // downloads with consecutive button clicks.
     private boolean mDownloading = false;
 
+    //settings for the tolerance of a left or right swipe
     private static final int SWIPE_MIN_DISTANCE = 120;
     private static final int SWIPE_MAX_OFF_PATH = 250;
     private static final int SWIPE_THRESHOLD_VELOCITY = 200;
 
-    private String currentSubreddit;
-    private TagList list;
-    private String currentAfter;
-    private SubList sublist;
-    private boolean isPopular = true;
+    private String currentSubreddit;//the subreddit of the currently viewed posting
+    private TagList list; // the taglist for storing the like and dislike information
+    private String currentAfter;//the id of the next post in the specific subreddit
+    private SubList sublist;// stores the ids of the posts that will be pulled next for each subreddit
+    private boolean isPopular = true;// shows whether the current post comes from the popular subreddit
 
+    //places to long term store the taglist information and the subreddit list information
     private SharedPreferences.Editor tagPref;
     private SharedPreferences.Editor placePref;
     private SharedPreferences tagSettings;
@@ -68,16 +62,17 @@ public class MainActivity  extends AppCompatActivity implements  DownloadCallbac
     protected void onCreate (Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+         //initializing the views
         text = (TextView) findViewById(R.id.text1);
         iv = (ImageView) findViewById(R.id.imageView) ;
         gestureDetector = new GestureDetectorCompat(this, this);
         gestureDetector.setOnDoubleTapListener(this);
 
-
+        //initializing the list
         list = new TagList();
         sublist = new SubList();
 
+        //pulling the last taglist and sublist from the previous session or creating a new place to store it
         tagSettings = getSharedPreferences("stakTagSave", Context.MODE_PRIVATE);
         placeSettings = getSharedPreferences("stakPlaceSave", Context.MODE_PRIVATE);
         tagPref = tagSettings.edit();
@@ -93,6 +88,7 @@ public class MainActivity  extends AppCompatActivity implements  DownloadCallbac
         String newSub = list.getTag();
         isPopular = newSub.equals("popular");
 
+        //pulls the first listing from reddit then starts downloading it, after done downloading it will go to update download( com.example.miche_000.stak.MainActivity#updateFromDownload(java.lang.Object))
         if(sublist.getAfter(newSub).equals("notIn")) {
             mNetworkFragment = NetworkFragment.getInstance(getSupportFragmentManager(), "https://www.reddit.com/r/" + newSub + ".json?limit=1");
             System.out.println("https://www.reddit.com/r/" + newSub + ".json?limit=1");
@@ -110,6 +106,10 @@ public class MainActivity  extends AppCompatActivity implements  DownloadCallbac
 
     }
 
+
+    /*
+
+     */
     private void startDownload() {
         if (!mDownloading && mNetworkFragment != null) {
             // Execute the async download.
@@ -341,7 +341,7 @@ public class MainActivity  extends AppCompatActivity implements  DownloadCallbac
      */
     @Override
     public boolean onDown(MotionEvent e) {
-        //sublist = new SubList();
+        sublist = new SubList();
         return true;
     }
 
