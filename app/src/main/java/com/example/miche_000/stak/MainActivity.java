@@ -106,9 +106,8 @@ public class MainActivity  extends AppCompatActivity implements  DownloadCallbac
 
     }
 
-
-    /*
-
+    /**
+     * starts the download of a link, goes to updateFromDownload method after done
      */
     private void startDownload() {
         if (!mDownloading && mNetworkFragment != null) {
@@ -132,32 +131,32 @@ public class MainActivity  extends AppCompatActivity implements  DownloadCallbac
     @Override
     public void updateFromDownload(Object result) {
         String json = (String) result;
-        save();
-        if(getDomain(json).equals("youtube.com")){
+        save();//saves the current taglist and sublist
+        if(getDomain(json).equals("youtube.com")){//video posts have different json formats so have to be handled differently
 
         }
         else {
-        int dataStart = json.lastIndexOf("\"data\":")+7;
-        int dataEnd = json.lastIndexOf("after")-5;
-        String title = json.substring(dataStart, dataEnd);
+            int dataStart = json.lastIndexOf("\"data\":")+7;//finds the start of the data section of the json
+            int dataEnd = json.lastIndexOf("after")-5;
+            String title = json.substring(dataStart, dataEnd); // creates a substring of the data section
 
-        int afterStart = json.lastIndexOf("after")+9;
-        int afterEnd = json.lastIndexOf("before")-4;
-        currentAfter = json.substring(afterStart, afterEnd);
+            int afterStart = json.lastIndexOf("after")+9;//finds the start of the after pointer
+            int afterEnd = json.lastIndexOf("before")-4;
+            currentAfter = json.substring(afterStart, afterEnd);
 
 
 
             Gson gson = new Gson();
             listing d;
             try {
-                d = gson.fromJson(title, listing.class);
+                d = gson.fromJson(title, listing.class);//turns the data into a listing
             } catch (JsonSyntaxException e) {
                 d = new listing();
                 text.setText(e.toString());
             }
-            text.setText(d.getTitle());
-            currentSubreddit = d.getSubreddit();
-            Picasso.with(this).load(d.getUrl()).into(iv);
+            text.setText(d.getTitle());//sets the text to the title
+            currentSubreddit = d.getSubreddit();//sets the current subreddit
+            Picasso.with(this).load(d.getUrl()).into(iv);//sets the image to the image from the url in the listing
         }
 
     }
@@ -198,20 +197,30 @@ public class MainActivity  extends AppCompatActivity implements  DownloadCallbac
         System.out.println("finished");
     }
 
+    /**
+     * gets the domain of a full json of a listing
+     * @param j
+     * @return
+     */
     public String getDomain(String j){
         int start = j.lastIndexOf("\"domain\":")+11;
         int end = j.lastIndexOf("\"hidden\":") -3;
         return j.substring(start, end);
     }
 
-
+    /**
+     * saves the current taglist and sublist to saved preerences
+     * @return true if the save succeeded
+     */
     public boolean save(){
         GsonBuilder gsonb = new GsonBuilder();
         Gson gson = gsonb.create();
         try{
+            // converts the lists into jsons
             String tagValue = gson.toJson(list);
             String placeValue = gson.toJson(sublist);
 
+            //saves the json that was made
             tagPref.putString("stakTagSave", tagValue);
             tagPref.commit();
 
@@ -226,6 +235,9 @@ public class MainActivity  extends AppCompatActivity implements  DownloadCallbac
         }
     }
 
+    /**
+     * restores the previous sublist and taglist from saved preferences
+     */
     public void restore(){
         GsonBuilder gsonb = new GsonBuilder();
         Gson gson = gsonb.create();
@@ -242,9 +254,12 @@ public class MainActivity  extends AppCompatActivity implements  DownloadCallbac
     }
 
 
-
+    /**
+     * handles left swipe action, dislikes the current subreddit, starts download of next listing
+     */
     public void onLeftSwipe(){
-        list.dislike(new PersonalTag(currentSubreddit));
+        list.dislike(new PersonalTag(currentSubreddit));//dislikes current subreddit
+        //sets which subreddit it will set the after to
         if(isPopular){
             sublist.setAfter("popular", currentAfter);
         }
@@ -252,9 +267,9 @@ public class MainActivity  extends AppCompatActivity implements  DownloadCallbac
             sublist.setAfter(currentSubreddit, currentAfter);
 
         String newSub = list.getTag();
-        isPopular = newSub.equals("popular");
-
-        if(sublist.getAfter(newSub).equals("notIn")) {
+        isPopular = newSub.equals("popular");//checks if the newsub is popular and sets the boolean
+        //assign the network fragment to a new url based on the after in the sublist
+        if(sublist.getAfter(newSub).equals("notIn")) {//checks if the newsub is in the sublist so it can see if it has to get the post from sublist.
             mNetworkFragment = NetworkFragment.getInstance(getSupportFragmentManager(), "https://www.reddit.com/r/" + newSub + ".json?limit=1");
             System.out.println("https://www.reddit.com/r/" + newSub + ".json?limit=1");
         }
@@ -264,30 +279,34 @@ public class MainActivity  extends AppCompatActivity implements  DownloadCallbac
         }
         mNetworkFragment.onCreate(null);
         mNetworkFragment.setmCallback(this);
-        startDownload();
+        startDownload();//start download on new listing
         System.out.println("left swipe");
 
     }
 
+    /**
+     * handles the right swipe action, likes the current subreddit, pulls up new url and starts the download on the url
+     */
     public void onRightSwipe(){
 
-        list.like(new PersonalTag(currentSubreddit));
+        list.like(new PersonalTag(currentSubreddit));//likes current subreddit
+       //checks if listing is from popular subreddit to assign after
         if(isPopular){
             sublist.setAfter("popular", currentAfter);
         }
         else
             sublist.setAfter(currentSubreddit, currentAfter);
 
-        String newSub = list.getTag();
+        String newSub = list.getTag();//gets the next sub and checks if it is popular
         isPopular = newSub.equals("popular");
-
+        //checks if its already in sublist, if not just goes to first listing in subreddit, if it is then goes to the next listing
         if(sublist.getAfter(newSub).equals("notIn"))
             mNetworkFragment = NetworkFragment.getInstance(getSupportFragmentManager(), "https://www.reddit.com/r/"+newSub+".json?limit=1");
         else
             mNetworkFragment = NetworkFragment.getInstance(getSupportFragmentManager(), "https://www.reddit.com/r/"+newSub+".json?limit=1;after="+sublist.getAfter(newSub));
         mNetworkFragment.onCreate(null);
         mNetworkFragment.setmCallback(this);
-        startDownload();
+        startDownload();//starts download for new listing
         System.out.println("right swipe");
     }
 
@@ -404,7 +423,8 @@ public class MainActivity  extends AppCompatActivity implements  DownloadCallbac
     /**
      * Notified of a fling event when it occurs with the initial on down {@link MotionEvent}
      * and the matching up {@link MotionEvent}. The calculated velocity is supplied along
-     * the x and y axis in pixels per second.
+     * the x and y axis in pixels per second. calls onLeftSwipe when swiping lef, calls
+     * onRightSwipe when rightswiping
      *
      * @param e1        The first down motion event that started the fling.
      * @param e2        The move motion event that triggered the current onFling.

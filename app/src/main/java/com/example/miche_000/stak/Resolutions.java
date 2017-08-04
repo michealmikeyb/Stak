@@ -1,6 +1,7 @@
 package com.example.miche_000.stak;
 
 /**
+ * resolutions that a picture from a listing that it can be displayed at
  * Created by miche_000 on 7/25/2017.
  */
 

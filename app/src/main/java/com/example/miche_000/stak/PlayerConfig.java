@@ -1,6 +1,7 @@
 package com.example.miche_000.stak;
 
 /**
+ * handles the api key for google
  * Created by miche_000 on 7/26/2017.
  */
 

@@ -1,6 +1,7 @@
 package com.example.miche_000.stak;
 
 /**
+ * handles mp4 data for listings
  * Created by miche_000 on 7/25/2017.
  */
 

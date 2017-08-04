@@ -20,6 +20,7 @@ import java.net.URL;
 import javax.net.ssl.HttpsURLConnection;
 
 /**
+ * handles the network fragment that is used to download the json for a listing
  * Created by miche_000 on 7/25/2017.
  */
 

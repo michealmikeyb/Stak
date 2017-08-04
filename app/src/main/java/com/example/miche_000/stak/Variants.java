@@ -1,6 +1,7 @@
 package com.example.miche_000.stak;
 
 /**
+ * handles the variants of a certain listing
  * Created by miche_000 on 7/25/2017.
  */
 
